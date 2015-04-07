@@ -208,3 +208,16 @@ class TestSchedule(unittest.TestCase):
 		schedule = make_schedule(["CS101", "CS201", "CS301"], [])
 		
 		self.assertTrue(schedule)
+	
+	def test_extended_credits(self):
+		ts1 = Timeslot('FA12', {'M': ['09:00', '11:00'], 'R': ['09:00', '11:00']})
+		ts2 = Timeslot('FA12', {'T': ['09:00', '11:00'], 'F': ['09:00', '11:00']})
+		ts3 = Timeslot('FA12', {'W': ['09:00', '11:00']})
+		
+		c1 = Course("CS101", ts1, credit_hours=7)
+		c2 = Course("CS201", ts2, credit_hours=7)
+		c3 = Course("CS301", ts3, credit_hours=7)
+		
+		schedule = make_schedule(["CS101", "CS201", "CS301"], [], max_credits=21)
+		
+		self.assertTrue(schedule)

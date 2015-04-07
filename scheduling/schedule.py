@@ -1,7 +1,7 @@
 from course import Course
 from requirement import Requirement
 
-def make_schedule(requirements, taken_courses=[]):
+def make_schedule(requirements, taken_courses=[], max_credits=15):
 	"""Given a list of required course CRN's (or requirements), and taken course CRN's
 	return a list of courses to take or False if it's not possible"""
 	# Turn non-requirements into requirements
@@ -34,12 +34,12 @@ def make_schedule(requirements, taken_courses=[]):
 				if not conflicts:
 					# Make sure we can take it, then recurse
 					schedule = []
-					if not c.can_take(current_schedule):
+					if not c.can_take(current_schedule, credit_hour_limit=max_credits):
 						schedule =  __make_schedule(requirements, current_schedule)
 						if schedule == False:
 							continue
 						# If we still can't take it, continue
-						if not c.can_take(schedule):
+						if not c.can_take(schedule, credit_hour_limit=max_credits):
 							continue
 						schedule += [c]
 					else:
