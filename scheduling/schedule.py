@@ -32,7 +32,7 @@ def make_schedule(required_courses, taken_courses=[]):
 					if schedule == False:
 						continue
 					# If we still can't take it, continue
-					if not c.can_take(current_schedule):
+					if not c.can_take(schedule):
 						continue
 					schedule += [c]
 				else:
