@@ -16,15 +16,6 @@ def make_schedule(required_courses, taken_courses=[]):
 		course = required_courses[0]
 		required_courses = required_courses[1:]
 		
-		# If we can't take this course, let the rest of the schedule be made and try again
-		if len(Course.get_all_by_crn(course)) > 0 and \
-			not Course.get_all_by_crn(course)[0].can_take(current_schedule):
-			current_schedule = __make_schedule(required_courses, current_schedule)
-			if current_schedule == False:
-				return False
-			if not Course.get_all_by_crn(course)[0].can_take(current_schedule):
-				return False
-		
 		for c in Course.get_all_by_crn(course):
 			# Check to see if this course conflicts with anything
 			conflicts = False
@@ -34,7 +25,18 @@ def make_schedule(required_courses, taken_courses=[]):
 					break
 			
 			if not conflicts:
-				schedule = __make_schedule(required_courses, current_schedule + [c])
+				# Make sure we can take it, then recurse
+				schedule = []
+				if not c.can_take(current_schedule):
+					schedule =  __make_schedule(required_courses, current_schedule)
+					if schedule == False:
+						continue
+					# If we still can't take it, continue
+					if not c.can_take(current_schedule):
+						continue
+					schedule += [c]
+				else:
+					schedule = __make_schedule(required_courses, current_schedule + [c])
 				if schedule != False:
 					return schedule
 		return False

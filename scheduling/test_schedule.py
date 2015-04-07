@@ -92,3 +92,43 @@ class TestSchedule(unittest.TestCase):
 		schedule = make_schedule(["CS101", "CS201"], [])
 		
 		self.assertTrue(schedule == False)
+	
+	def test_simple_schedule_with_prereqs_3_levels(self):
+		ts1 = Timeslot('FA12', {'M': ['09:00', '11:00'], 'R': ['09:00', '11:00']})
+		ts2 = Timeslot('FA13', {'M': ['09:00', '11:00'], 'R': ['09:00', '11:00']})
+		ts3 = Timeslot('FA14', {'M': ['09:00', '11:00'], 'R': ['09:00', '11:00']})
+		
+		c1 = Course("CS101", ts1)
+		c2 = Course("CS201", ts2, ["CS101"])
+		c3 = Course("CS301", ts3, ["CS201"])
+		
+		schedule = make_schedule(["CS101", "CS201", "CS301"], [])
+		
+		self.assertTrue(schedule != False)
+		
+		required_courses = ["CS101", "CS201", "CS301"]
+		self.assertEqual(len(schedule), len(required_courses))
+		for c in schedule:
+			required_courses.remove(c.CRN)
+		self.assertEqual(len(required_courses), 0)
+	
+	def test_simple_schedule_with_not_possible_first_schedule(self):
+		ts1 = Timeslot('FA12', {'M': ['09:00', '11:00'], 'R': ['09:00', '11:00']})
+		ts2 = Timeslot('FA13', {'M': ['09:00', '11:00'], 'R': ['09:00', '11:00']})
+		ts3 = Timeslot('FA14', {'M': ['09:00', '11:00'], 'R': ['09:00', '11:00']})
+		ts4 = Timeslot('FA11', {'M': ['09:00', '11:00'], 'R': ['09:00', '11:00']})
+		
+		c4 = Course("CS301", ts4, ["CS201"])
+		c1 = Course("CS101", ts1)
+		c2 = Course("CS201", ts2, ["CS101"])
+		c3 = Course("CS301", ts3, ["CS201"])
+		
+		schedule = make_schedule(["CS101", "CS201", "CS301"], [])
+		
+		self.assertTrue(schedule != False)
+		
+		required_courses = ["CS101", "CS201", "CS301"]
+		self.assertEqual(len(schedule), len(required_courses))
+		for c in schedule:
+			required_courses.remove(c.CRN)
+		self.assertEqual(len(required_courses), 0)
