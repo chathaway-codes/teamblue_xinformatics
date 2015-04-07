@@ -3,9 +3,10 @@ from timeslot import *
 class Course:
 	__courses_by_crn = {}
 	
-	def __init__(self, CRN, timeslot, prereqs=None):
+	def __init__(self, CRN, timeslot, prereqs=None, credit_hours=3):
 		self.CRN = CRN
 		self.timeslot = timeslot
+		self.credit_hours = credit_hours
 		
 		if prereqs != None:
 			self.prereqs = prereqs
@@ -17,7 +18,7 @@ class Course:
 		else:
 			Course.__courses_by_crn[CRN] = [self]
 	
-	def can_take(self, courses):
+	def can_take(self, courses, credit_hour_limit=15):
 		for r in self.prereqs:
 			found = False
 			for c in courses:
@@ -27,6 +28,13 @@ class Course:
 					break
 			if not found:
 				return False
+		# Do we exceed credit hour limit?
+		credits_so_far = self.credit_hours
+		for c in courses:
+			if c.timeslot.semester == self.timeslot.semester:
+				credits_so_far += c.credit_hours
+		if credits_so_far > credit_hour_limit:
+			return False
 		return True
 	
 	@staticmethod

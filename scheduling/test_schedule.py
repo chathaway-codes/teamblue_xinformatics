@@ -182,3 +182,29 @@ class TestSchedule(unittest.TestCase):
 		for c in schedule:
 			required_courses.remove(c.CRN)
 		self.assertEqual(len(required_courses), 0)
+	
+	def test_exceed_credits(self):
+		ts1 = Timeslot('FA12', {'M': ['09:00', '11:00'], 'R': ['09:00', '11:00']})
+		ts2 = Timeslot('FA12', {'T': ['09:00', '11:00'], 'F': ['09:00', '11:00']})
+		ts3 = Timeslot('FA12', {'W': ['09:00', '11:00']})
+		
+		c1 = Course("CS101", ts1, credit_hours=7)
+		c2 = Course("CS201", ts2, credit_hours=7)
+		c3 = Course("CS301", ts3, credit_hours=7)
+		
+		schedule = make_schedule(["CS101", "CS201", "CS301"], [])
+		
+		self.assertFalse(schedule)
+	
+	def test_equal_credits(self):
+		ts1 = Timeslot('FA12', {'M': ['09:00', '11:00'], 'R': ['09:00', '11:00']})
+		ts2 = Timeslot('FA12', {'T': ['09:00', '11:00'], 'F': ['09:00', '11:00']})
+		ts3 = Timeslot('FA12', {'W': ['09:00', '11:00']})
+		
+		c1 = Course("CS101", ts1, credit_hours=3)
+		c2 = Course("CS201", ts2, credit_hours=3)
+		c3 = Course("CS301", ts3, credit_hours=1)
+		
+		schedule = make_schedule(["CS101", "CS201", "CS301"], [])
+		
+		self.assertTrue(schedule)
