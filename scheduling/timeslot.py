@@ -56,3 +56,26 @@ class Timeslot:
 				if self.__compare_times(start1, start2) == 0:
 					return True
 		return False
+	
+	@staticmethod
+	def compare_semesters(SM1, SM2):
+		"""Given two semesters, returns -1 if SM1 is before SM2,
+		0 if SM1 is at the same time as SM2, and 1 if SM1 is after SM2"""
+		
+		order = ['SP', 'SU', 'FA']
+		t1 = order.index(SM1[:2])
+		t2 = order.index(SM2[:2])
+		
+		y1 = int(SM1[2:])
+		y2 = int(SM2[2:])
+		
+		if y1 < y2:
+			return -1
+		if y2 < y1:
+			return 1
+		else:
+			if t1 < t2:
+				return -1
+			if t2 < t1:
+				return 1
+		return 0

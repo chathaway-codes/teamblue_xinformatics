@@ -44,3 +44,12 @@ class TestTimeslotMethods(unittest.TestCase):
 		slot2 = Timeslot('FA12', {'M': ['10:00', '11:00'], 'R': ['10:00', '11:00']})
 		
 		self.assertTrue(slot2.conflicts(slot1))
+	
+	def test_compare_semesters(self):
+		self.assertEqual(Timeslot.compare_semesters("FA12", "FA13"), -1)
+		self.assertEqual(Timeslot.compare_semesters("FA12", "FA12"), 0)
+		self.assertEqual(Timeslot.compare_semesters("FA13", "FA12"), 1)
+		
+		self.assertEqual(Timeslot.compare_semesters("SP12", "FA12"), -1)
+		self.assertEqual(Timeslot.compare_semesters("FA12", "FA12"), 0)
+		self.assertEqual(Timeslot.compare_semesters("FA12", "SU12"), 1)
