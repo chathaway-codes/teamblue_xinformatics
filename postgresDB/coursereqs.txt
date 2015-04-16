@@ -1,0 +1,15 @@
+CSCI-1100 Computer Science I
+MATH-1010 Calculus I
+PHYS-1100 Physics I
+CSCI-1200 Data Structures	CSCI-1100
+MATH-1020 Calculus II	MATH-1010
+BIOL-1010 Introduction to Biology
+BIOL-1015 Introduction to Biology Lab
+CSCI-2200 Foundations of Computer Science	MATH-1010	CSCI-1100
+CSCI-2500 Computer Organization	CSCI-1200
+CSCI-2300 Introduction to Algorithms	CSCI-1200	MATH-1010	CSCI-2200
+CSCI-2300 Introduction to Algorithms	CSCI-1200	MATH-1010	MATH-2800
+CSCI-2600 Principles of Software	CSCI-1200
+CSCI-4430 Programming Languages	CSCI-2300
+CSCI-4210 Operating Systems	CSCI-2300	CSCI-2500
+CSCI-4440 Software Design and Documentation	CSCI-2300
