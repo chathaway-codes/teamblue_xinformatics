@@ -1,0 +1,17 @@
+1) figure out JDBC connection
+2) Get code to connect to DB to compile
+3) Try insert statement
+4) Get everything to insert into database
+5) Finish database
+6) Dump into .sql file
+7) Put all code and database on GitHub.
+8) Study Logical Model/Directions
+9) Draft a logical model
+10) Begin writing up/drafting the #2 answer.
+
+7pm
+11) Call Grandma about this weekend.
+12) Get dressed for mckinney thing
+13) mckinney
+14) Help Jelly
+15) Upload work to google drive.

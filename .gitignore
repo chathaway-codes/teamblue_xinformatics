@@ -1,1 +1,9 @@
+workspace/
+eclipse/
+*~
+~*
+*.swp
+*.bak
 *.pyc
+*.sqlite3
+python/
