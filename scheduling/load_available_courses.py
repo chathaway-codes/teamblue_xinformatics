@@ -5,7 +5,7 @@ from timeslot import Timeslot
 
 def load_available_courses(csv_file_name):
     # Opens available courses file
-    f = open(csv_file_name) #('sis_class_schedule_fall_2014_CSCI.csv')
+    f = open(csv_file_name)
 
     csv_f = csv.DictReader(f)
 
@@ -14,6 +14,51 @@ def load_available_courses(csv_file_name):
     f.close()
 
     return available_crn
+
+def parse_csv(csv_file):
+    crn = []
+    
+    for row in csv_file:
+        # If meridian is not 'AM' or 'PM' set to 'AM'
+        m = row['']
+        if m != 'AM' and m != 'PM':
+            m = 'AM'
+
+        # If not in HH:MM format set to empty string
+        st = check_time(row['start_time'])
+        if st != '':
+            st = st + m
+        et = check_time(row['end_time'])
+        if et != '':
+            et = et + m
+        
+        ts = parse_time(row['days'], st, et)
+
+        # Create course
+        # Initializing with no prereqs (need database with prereqs)
+        c = Course(row['crn?'], ts, None, row['credit_hours'])
+        
+        crn.append(c)
+
+    return crn
+
+def check_time(time):
+    if ':' not in time:
+        return ''
+    else:
+        hours = time.split(':')[0]
+        minutes = time.split(':')[1]
+        # Validate hours
+        if ((len(hours) == 1 or len(hours) == 2) and \
+            (int(hours) > 0 and int(hours) < 13)):
+            # Validate minutes
+            if (len(minutes) == 2 and \
+                (int(minutes) > -1 and int(minutes) < 60)):
+                return time
+            else:
+                return ''
+        else:
+            return ''
 
 def parse_time(days, start_time, end_time):
     # Convert times from 12 hr to 24 hr
@@ -37,34 +82,6 @@ def parse_time(days, start_time, end_time):
     # Hard-coded semester (should be read in somehow)
     return Timeslot("FA14", d)
 
-def parse_csv(csv_file):
-    crn = []
-    
-    for row in csv_file:
-        # If meridian is not 'AM' or 'PM' set to 'AM'
-        m = row['']
-        if m != 'AM' and m != 'PM':
-            m = 'AM'
-
-        # If not in HH:MM format set to empty string
-        # Need to correct.  Currently only assumes TBA as only bad input.
-        st = row['start_time']
-        if st == '** TBA **':
-            st = ''
-        et = row['end_time']
-        if et == '** TBA **':
-            et = ''
-        
-        ts = parse_time(row['days'], st + m, et + m)
-
-        # Create course
-        # Initializing with no prereqs (need database with prereqs)
-        c = Course(row['crn?'], ts, None, row['credit_hours'])
-        
-        crn.append(c)
-
-    return crn
-
 def convert_time(time):
     # Assumes time is in one of the following formats H:MMAM, H:MMPM,
     #     HH:MMAM, HH:MMPM
@@ -87,6 +104,6 @@ if __name__ == "__main__":
     load_available_courses('sis_class_schedule_fall_2014_CSCI.csv')
 
 ### For testing purposes
-available_crn = load_available_courses('sis_class_schedule_fall_2014_CSCI.csv')
-for c in available_crn:
-    print c.CRN, c.timeslot.semester, c.timeslot.day_time, c.prereqs, c.credit_hours
+##available_crn = load_available_courses('sis_class_schedule_fall_2014_CSCI.csv')
+##for c in available_crn:
+##    print c.CRN, c.timeslot.semester, c.timeslot.day_time, c.prereqs, c.credit_hours
