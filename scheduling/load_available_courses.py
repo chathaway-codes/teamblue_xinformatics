@@ -3,44 +3,64 @@ import csv
 from course import Course
 from timeslot import Timeslot
 
-def load_available_courses():
+def load_available_courses(csv_file_name):
     # Opens available courses file
-    f = open_csv('sis_class_schedule_fall_2014_CSCI.csv')
+    f = open(csv_file_name) #('sis_class_schedule_fall_2014_CSCI.csv')
 
     csv_f = csv.DictReader(f)
 
-    crn = read_csv(csv_f)
+    available_crn = parse_csv(csv_f)
 
     f.close()
 
-    return crn
+    return available_crn
 
-def open_csv(file_name):
-    return open(file_name)
+def parse_time(start_time, end_time):
+    # Need to convert times from 12 hr to 24 hr
+    start_time = convert_time(start_time + m)
+    end_time = convert_time(end_time + m)
+ 
+    # Read in the times for the course
+    d = {}
+    days = row['days']
+    if 'M' in days:
+        d['M'] = [start_time, end_time]
+    if 'T' in days:
+        d['T'] = [start_time, end_time]
+    if 'W' in days:
+        d['W'] = [start_time, end_time]
+    if 'R' in days:
+        d['R'] = [start_time, end_time]
+    if 'F' in days:
+        d['F'] = [start_time, end_time]
+ 
+    # Create timeslot for the course
+    # Hard-coded semester (should be read in somehow)
+    return Timeslot("FA14", d)
 
-def read_csv(csv_file):
+    
+
+def parse_csv(csv_file):
     crn = []
     
     # Should add a way to skip the header line
     for row in csv_file:
-        # Read in the times for the course
-        # Need to make times military time
-        t = {}
-        days = str(row['days'])
-        if 'M' in days:
-            t['M'] = [row['start_time'], row['end_time']]
-        if 'T' in days:
-            t['T'] = [row['start_time'], row['end_time']]
-        if 'W' in days:
-            t['W'] = [row['start_time'], row['end_time']]
-        if 'R' in days:
-            t['R'] = [row['start_time'], row['end_time']]
-        if 'F' in days:
-            t['F'] = [row['start_time'], row['end_time']]
+        # Make sure AM and PM are in correct format
+        # Assume that if meridian is not 'AM' or 'PM'
+        #     set to 'AM'
+        m = row['']
+        if m != 'AM' and m != 'PM':
+            m = 'AM'
 
-        # Create timeslot for the course
-        # Hard-coded semester (should be read in somehow)
-        ts = Timeslot("FA14", t)
+        # Make sure HH:MM is in the correct format
+        st = row['start_time']
+        if st == '** TBA **':
+            st = ''
+        et = row['end_time']
+        if et == '** TBA **':
+            et = ''
+        
+        ts = parse_time(st, et)
 
         # Create a new course
         # Initializing with no prereqs (need database with prereqs)
@@ -50,7 +70,23 @@ def read_csv(csv_file):
 
     return crn
 
-# For testing purposes
-available_crn = load_available_courses()
-for c in available_crn:
-    print c.CRN, c.timeslot.semester, c.timeslot.day_time, c.prereqs, c.credit_hours
+# There is an issue '10:00AM' & '11:00AM' times.
+# Printing out as '010:00' & '011:00'
+def convert_time(time):
+    if time[-2:] == 'AM':
+        time = '0' + time[-len(time):-2]
+    elif time[-2:] == 'PM':
+        size = len(time)
+        hours = int(time[-size:size - 5])
+        if hours != 12:
+            hours += 12
+        time = str(hours) + time[-5:-2]
+    return time
+
+if __name__ == "__main__":
+    load_available_courses('sis_class_schedule_fall_2014_CSCI.csv')
+
+### For testing purposes
+##available_crn = load_available_courses()
+##for c in available_crn:
+##    print c.CRN, c.timeslot.semester, c.timeslot.day_time, c.prereqs, c.credit_hours
