@@ -4,7 +4,7 @@ from course import Course
 from timeslot import Timeslot
 
 def load_available_courses(csv_file_name):
-    # Opens available courses file
+    # Open available courses file
     f = open(csv_file_name)
 
     csv_f = csv.DictReader(f)
@@ -24,18 +24,18 @@ def parse_csv(csv_file):
         if m != 'AM' and m != 'PM':
             m = 'AM'
 
-        # If not in HH:MM format set to empty string
+        # Read in start and end time
         st = check_time(row['start_time'])
-        if st != '':
-            st = st + m
         et = check_time(row['end_time'])
-        if et != '':
-            et = et + m
-        
+
+        # Give start time correct meridian
+        st, et = decide_am_pm(st, et, m)
+
+        # Create a timeslot 
         ts = parse_time(row['days'], st, et)
 
         # Create course
-        # Initializing with no prereqs (need database with prereqs)
+        # Initialize with no prereqs (need database with prereqs)
         c = Course(row['crn?'], ts, None, row['credit_hours'])
         
         crn.append(c)
@@ -44,10 +44,11 @@ def parse_csv(csv_file):
 
 def check_time(time):
     if ':' not in time:
-        return ''
+        raise Exception('Invalid time string')
     else:
         hours = time.split(':')[0]
         minutes = time.split(':')[1]
+        
         # Validate hours
         if ((len(hours) == 1 or len(hours) == 2) and \
             (int(hours) > 0 and int(hours) < 13)):
@@ -56,9 +57,28 @@ def check_time(time):
                 (int(minutes) > -1 and int(minutes) < 60)):
                 return time
             else:
-                return ''
+                raise Exception('Invalid minutes')
         else:
-            return ''
+            raise Exception('Invalid hours')
+
+def decide_am_pm(time1, time2, me):
+    h1 = int(time1.split(':')[0])
+    h2 = int(time2.split(':')[0])
+
+    if h2 < h1 or h2 == 12:
+        if me == 'AM':
+            if h1 == 12:
+                yield time1 + 'AM'
+            else:
+                yield time1 + 'PM'
+        else:
+            if h1 == 12:
+                yield time1 + 'PM'
+            else:
+                yield time1 + 'AM'
+    else:
+        yield time1 + me
+    yield time2 + me
 
 def parse_time(days, start_time, end_time):
     # Convert times from 12 hr to 24 hr
@@ -79,31 +99,33 @@ def parse_time(days, start_time, end_time):
         d['F'] = [start_time, end_time]
  
     # Create timeslot for the course
-    # Hard-coded semester (should be read in somehow)
+    # Hard-code semester (should be read in somehow)
     return Timeslot("FA14", d)
 
 def convert_time(time):
-    # Assumes time is in one of the following formats H:MMAM, H:MMPM,
-    #     HH:MMAM, HH:MMPM
-    if time[-2:] == 'AM':
-        # Checks if hours is 2 digits, then truncates meridian
-        if len(time.split(':')[0]) == 2:
-            time = time.split('AM')[0]
-        # If hour is 1 digit, add 0 before hour and truncate meridian
-        else:
-            time = '0' + time.split('AM')[0]
-    # Changes PM times to correct 24 hr format and truncates meridian
-    elif time[-2:] == 'PM':
-        hours = int(time.split(':')[0])
-        if hours != 12:
-            hours += 12
-        time = str(hours) + ':' + time.split(':')[1].split('PM')[0]
-    return time
+    # time should be in one of the following formats:
+    #     H:MMAM, H:MMPM, HH:MMAM, HH:MMPM
+    h = int(time.split(':')[0])
+    me = time[-2:].upper()
+    m = int(time.split(':')[1].split(me)[0])
+
+    if me == '':
+        raise Exception('No AM or PM specified')
+
+    # Change 12AM to correct 24 hr format
+    if me == 'AM' and h == 12:
+        h = 0
+    # Change PM time to correct 24 hr format
+    elif me == 'PM':
+        if h != 12:
+            h += 12
+    
+    return "%02d:%02d" % (h, m)
 
 if __name__ == "__main__":
     load_available_courses('sis_class_schedule_fall_2014_CSCI.csv')
 
-### For testing purposes
+# For testing purposes
 ##available_crn = load_available_courses('sis_class_schedule_fall_2014_CSCI.csv')
 ##for c in available_crn:
 ##    print c.CRN, c.timeslot.semester, c.timeslot.day_time, c.prereqs, c.credit_hours
