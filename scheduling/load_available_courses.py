@@ -17,27 +17,35 @@ def load_available_courses(csv_file_name):
 
 def parse_csv(csv_file):
     crn = []
-    
+
     for row in csv_file:
         # If meridian is not 'AM' or 'PM' set to 'AM'
-        m = row['']
+        m = row['meridian']
         if m != 'AM' and m != 'PM':
             m = 'AM'
 
         # Read in start and end time
-        st = check_time(row['start_time'])
-        et = check_time(row['end_time'])
+        try:
+            st = check_time(row['start_time'])
+            et = check_time(row['end_time'])
+        except Exception as e:
+            print row
+            raise e
 
         # Give start time correct meridian
         st, et = decide_am_pm(st, et, m)
 
-        # Create a timeslot 
+        # Create a timeslot
         ts = parse_time(row['days'], st, et)
 
         # Create course
         # Initialize with no prereqs (need database with prereqs)
-        c = Course(row['crn?'], ts, None, row['credit_hours'])
-        
+        try:
+            c = Course(row['crn?'], ts, None, row['credit_hours'])
+        except Exception as e:
+            print row
+            raise e
+
         crn.append(c)
 
     return crn
@@ -48,7 +56,7 @@ def check_time(time):
     else:
         hours = time.split(':')[0]
         minutes = time.split(':')[1]
-        
+
         # Validate hours
         if ((len(hours) == 1 or len(hours) == 2) and \
             (int(hours) > 0 and int(hours) < 13)):
@@ -84,7 +92,7 @@ def parse_time(days, start_time, end_time):
     # Convert times from 12 hr to 24 hr
     start_time = convert_time(start_time)
     end_time = convert_time(end_time)
- 
+
     # Read in the times for the course
     d = {}
     if 'M' in days:
@@ -97,7 +105,7 @@ def parse_time(days, start_time, end_time):
         d['R'] = [start_time, end_time]
     if 'F' in days:
         d['F'] = [start_time, end_time]
- 
+
     # Create timeslot for the course
     # Hard-code semester (should be read in somehow)
     return Timeslot("FA14", d)
@@ -119,7 +127,7 @@ def convert_time(time):
     elif me == 'PM':
         if h != 12:
             h += 12
-    
+
     return "%02d:%02d" % (h, m)
 
 if __name__ == "__main__":
