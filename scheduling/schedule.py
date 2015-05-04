@@ -48,4 +48,4 @@ def make_schedule(requirements, taken_courses=[], max_credits=15):
 						return schedule
 		return False
 
-	return __make_schedule(requirements, taken_courses)
+	return __make_schedule(requirements, [])

@@ -5,22 +5,67 @@ from django.conf import settings
 
 from scheduling.course import Course as schedule_course
 from scheduling.course import Timeslot as schedule_timeslot
+from scheduling.requirement import Requirement as schedule_requirement
 
 def get_user_completed_courses(user):
     # Return a static list for now
-    return []
+    ret = []
+    for course in user.student_profile.courses.all():
+        ret += [course.crn]
+    return ret
 
 def get_user_required_courses(user):
     # Return a static list for now
     #return ["CSCI-1100","CSCI-1200","CSCI-2200","CSCI-2500","CSCI-2300","CSCI-2600","CSCI-4430","CSCI-4210"]
-    return ["CSCI-1100","CSCI-2200","CSCI-2500"]
+    ret = []
+    for requirement in user.student_profile.degree.degreerequirement_set.all():
+        req = []
+        for r in requirement.degreerequirementoption_set.all():
+            req += [r.crn]
+        ret += [schedule_requirement(req)]
+    return ret
 
 # Using the user: user = models.ForeignKey(settings.AUTH_USER_MODEL)
-class UserSchedule(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    courses = models.ManyToManyField('course_wizard.Course')
+class Student(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name="student_profile")
+    rin = models.IntegerField()
+    courses = models.ManyToManyField('course_wizard.Course', through='course_wizard.StudentCourse')
+    degree = models.ForeignKey('course_wizard.Degree', null=True)
 
     when_created = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return "%d -- %s" % (self.rin, self.user.__unicode__())
+
+class StudentCourse(models.Model):
+    student = models.ForeignKey('course_wizard.Student')
+    course = models.ForeignKey('course_wizard.Course')
+
+    grade_points = models.FloatField()
+
+    def __unicode__(self):
+        return "%s taking %s" % (self.student.__unicode__(), self.course.__unicode__())
+
+class Degree(models.Model):
+    name = models.CharField(max_length=255)
+    year = models.IntegerField()
+
+    def __unicode__(self):
+        return "%s, %s" % (self.name, self.year)
+
+class DegreeRequirement(models.Model):
+    name = models.CharField(max_length=255, null=True, blank=True)
+    degree = models.ForeignKey('course_wizard.Degree')
+
+    def __unicode__(self):
+        return "%s requires %s" % (self.degree.__unicode__(), self.name)
+
+class DegreeRequirementOption(models.Model):
+    requirement = models.ForeignKey('course_wizard.DegreeRequirement')
+    crn = models.CharField(max_length=16)
+
+    def __unicode__(self):
+        return self.crn
 
 class Course(models.Model):
     crn = models.CharField(max_length=255)
@@ -29,6 +74,9 @@ class Course(models.Model):
     # We can't store this as foreignkey because Courses have timeslot attached
     prereqs = models.CharField(max_length=255, null=True, blank=True)
     timeslot = models.ForeignKey('course_wizard.Timeslot')
+
+    def __unicode__(self):
+        return "%s @ %s" % (self.crn, self.timeslot.__unicode__())
 
     def to_schedule_course(self):
         ret = schedule_course(self.crn, self.timeslot.to_schedule_timeslot(),
@@ -48,6 +96,12 @@ class Course(models.Model):
 
 class Timeslot(models.Model):
     semester = models.CharField(max_length=4)
+
+    def __unicode__(self):
+        ret = self.semester + "; "
+        for day in self.days.all():
+            ret += day.__unicode__()
+        return ret
 
     def to_schedule_timeslot(self):
         day_times = {}
@@ -72,6 +126,9 @@ class DayTime(models.Model):
     day = models.CharField(max_length=1)
     start_time = models.TimeField()
     end_time = models.TimeField()
+
+    def __unicode__(self):
+        return "%s %s-%s" % (self.day, self.start_time, self.end_time)
 
     def to_object(self):
         start_time = "%02d:%02d" % (self.start_time.hour, self.start_time.minute)

@@ -13,6 +13,8 @@ urlpatterns = patterns('',
     # TemplateView + Login
     #url(r'^$', login_required(TemplateView.as_view(template_name="home.html")), {}, 'home'),
     url(r'^api/courses/$', 'course_wizard.views.list_of_courses', name='api-courses'),
+    url(r'^api/student/$', 'course_wizard.views.list_student_info', name='api-student'),
+    url(r'^api/login/$', 'course_wizard.views.api_login', name='api-login'),
 )
 
 if settings.DEBUG:
