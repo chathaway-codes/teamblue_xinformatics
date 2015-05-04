@@ -4,10 +4,12 @@ class Course:
 	__courses_by_crn = {}
 	initialized = False
 
-	def __init__(self, CRN, timeslot, prereqs=None, credit_hours=3):
+	def __init__(self, CRN, timeslot, prereqs=None, credit_hours=3, **kwargs):
 		self.CRN = CRN
 		self.timeslot = timeslot
 		self.credit_hours = credit_hours
+		
+		self.kwargs = kwargs
 
 		Course.initialized = True
 

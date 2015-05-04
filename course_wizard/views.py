@@ -34,6 +34,7 @@ def api_login(request):
 def list_student_info(request):
     # Returns information about the currently logged in user
     ret = {}
+    ret['name'] = "%s %s" % (request.user.first_name, request.user.last_name)
     ret['rin'] = request.user.student_profile.rin
     ret['degree'] = request.user.student_profile.degree.__unicode__()
     ret['courses'] = []
@@ -53,6 +54,7 @@ def list_student_info(request):
         sc = StudentCourse.objects.get(course=course, student=request.user.student_profile)
         ret['courses'] += [{
             'crn': course.crn,
+            'title': course.title,
             'grade': get_grade(sc.grade_points)
         }]
 

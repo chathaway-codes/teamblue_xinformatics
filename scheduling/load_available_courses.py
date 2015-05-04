@@ -41,7 +41,7 @@ def parse_csv(csv_file):
         # Create course
         # Initialize with no prereqs (need database with prereqs)
         try:
-            c = Course(row['crn?'], ts, None, row['credit_hours'])
+            c = Course(row['crn?'], ts, None, **row)
         except Exception as e:
             print row
             raise e

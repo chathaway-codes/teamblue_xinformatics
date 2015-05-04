@@ -75,6 +75,8 @@ class Course(models.Model):
     prereqs = models.CharField(max_length=255, null=True, blank=True)
     timeslot = models.ForeignKey('course_wizard.Timeslot')
 
+    title = models.CharField(max_length=255, null=True, blank=True)
+
     def __unicode__(self):
         return "%s @ %s" % (self.crn, self.timeslot.__unicode__())
 
@@ -92,7 +94,7 @@ class Course(models.Model):
             prereqs = ','.join(course.prereqs)
         timeslot = Timeslot.from_schedule_timeslot(course.timeslot, semester)
         return Course(crn=course.CRN, credit_hours=course.credit_hours,
-            prereqs=prereqs, timeslot=timeslot)
+            prereqs=prereqs, timeslot=timeslot, title=course.kwargs['course_title'])
 
 class Timeslot(models.Model):
     semester = models.CharField(max_length=4)
