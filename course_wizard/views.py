@@ -89,7 +89,8 @@ def list_of_courses(request):
                 'title': course.CRN,
                 'start': day.start_time,
                 'end': day.end_time,
-                'day': day.day
+                'day': day.day,
+                'semester': day.timeslot.semester
             }]
 
     return JsonResponse(ret, safe=False)

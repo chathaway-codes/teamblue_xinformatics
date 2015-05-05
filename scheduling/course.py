@@ -8,7 +8,7 @@ class Course:
 		self.CRN = CRN
 		self.timeslot = timeslot
 		self.credit_hours = credit_hours
-		
+
 		self.kwargs = kwargs
 
 		Course.initialized = True
@@ -43,6 +43,12 @@ class Course:
 		if credits_so_far > credit_hour_limit:
 			return False
 		return True
+
+	def __str__(self):
+		return self.CRN
+
+	def __repr__(self):
+		return self.CRN
 
 	@staticmethod
 	def get_all_by_crn(CRN):

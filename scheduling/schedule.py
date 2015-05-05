@@ -15,6 +15,9 @@ def make_schedule(requirements, taken_courses=[], max_credits=15):
 	# Sort required by the number of courses offered (fewer courses offered = more constrained)
 	sorted(requirements, cmp=lambda a, b: a.get_worst_crn() < b.get_worst_crn())
 
+	print "requirements: ", requirements
+	print "taken_courses: ", taken_courses
+
 	def __make_schedule(requirements, current_schedule):
 		if len(requirements) == 0:
 			return current_schedule
@@ -23,6 +26,8 @@ def make_schedule(requirements, taken_courses=[], max_credits=15):
 		requirements = requirements[1:]
 
 		for course in requirement.valid_courses:
+			if len(Course.get_all_by_crn(course)) == 0:
+				raise Exception("No class in catalog; %s" % course)
 			for c in Course.get_all_by_crn(course):
 				# Check to see if this course conflicts with anything
 				conflicts = False
